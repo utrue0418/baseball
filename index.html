@@ -532,7 +532,7 @@
     <!-- 상단 네비게이션 -->
     <header class="top-navbar">
         <div class="logo-area">
-            <span class="logo-ball">⚾</span>
+            <span class="logo-ball">⚾🧢</span>
             <h2>멸망까지 9이닝닝</h2>
         </div>
         <div class="nav-actions">
@@ -739,17 +739,17 @@
                 <div class="team-city">서울</div>
             </div>
             <div class="team-card" onclick="filterTeam('KT 위즈')">
-                <div class="team-logo">⚡</div>
+                <div class="team-logo">🧙🪄</div>
                 <div class="team-name">KT 위즈</div>
                 <div class="team-city">수원</div>
             </div>
             <div class="team-card" onclick="filterTeam('SSG 랜더스')">
-                <div class="team-logo">⚾</div>
+                <div class="team-logo">🐺</div>
                 <div class="team-name">SSG 랜더스</div>
                 <div class="team-city">인천</div>
             </div>
             <div class="team-card" onclick="filterTeam('롯데 자이언츠')">
-                <div class="team-logo">⚓</div>
+                <div class="team-logo">🦆</div>
                 <div class="team-name">롯데 자이언츠</div>
                 <div class="team-city">부산</div>
             </div>
@@ -822,7 +822,7 @@
         { id: 17, name: "이호연", team: "KT 위즈", position: "내야수", number: 34, games: 100, battingAvg: 0, homeRuns: 100, rbi: 0 },
         { id: 18, name: "유진공주", team: "KIA 타이거즈", position: "포수", number: 4, games: 1000, battingAvg: 0, homeRuns: 581494, rbi: 1000 },
         { id: 19, name: "소은공주", team: "KT 위즈", position: "내야수", number: 1, games: 1000, battingAvg: 0, homeRuns: 876494, rbi: 1000 },
-        { id: 20, name: "긍남박왕자", team: "키움", position: "투수", number: 100, games: 1000, battingAvg: 0, homeRuns: 0, rbi: 0 },
+        { id: 20, name: "긍남박왕자", team: "키움 히어로즈", position: "투수", number: 100, games: 1000, battingAvg: 0, homeRuns: 0, rbi: 0 },
     ];
 
     let nextId = 17;
@@ -878,7 +878,7 @@
     function showApp(username) {
         document.getElementById("loginSection").style.display = "none";
         document.getElementById("appSection").style.display = "block";
-        document.getElementById("welcomeMsg").innerText = "선수입장합니다, " + username + "님!";
+        document.getElementById("welcomeMsg").innerText = "선수입장, " + username + "님!";
         loadPlayers();
         updateTeamCompareSelect();
     }
