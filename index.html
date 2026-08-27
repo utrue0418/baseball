@@ -815,10 +815,14 @@
         { id: 10, name: "송성문", team: "키움 히어로즈", position: "내야수", number: 24, games: 93, battingAvg: 0.300, homeRuns: 12, rbi: 55 },
         { id: 11, name: "구자욱", team: "삼성 라이온즈", position: "외야수", number: 5, games: 94, battingAvg: 0.325, homeRuns: 17, rbi: 64 },
         { id: 12, name: "홍창기", team: "LG 트윈스", position: "외야수", number: 51, games: 97, battingAvg: 0.315, homeRuns: 7, rbi: 48 },
-        { id: 13, name: "김현수", team: "LG 트윈스", position: "외야수", number: 22, games: 95, battingAvg: 0.290, homeRuns: 14, rbi: 61 },
+        { id: 13, name: "김현수", team: "KT 위즈", position: "내야수", number: 10, games: 95, battingAvg: 0.290, homeRuns: 14, rbi: 61 },
         { id: 14, name: "최형우", team: "삼성 라이온즈", position: "지명타자", number: 34, games: 90, battingAvg: 0.285, homeRuns: 16, rbi: 63 },
         { id: 15, name: "김원중", team: "롯데 자이언츠", position: "투수", number: 34, games: 45, battingAvg: 0, homeRuns: 0, rbi: 0 },
-        { id: 16, name: "원태인", team: "삼성 라이온즈", position: "투수", number: 18, games: 20, battingAvg: 0, homeRuns: 0, rbi: 0 }
+        { id: 16, name: "원태인", team: "삼성 라이온즈", position: "투수", number: 18, games: 20, battingAvg: 0, homeRuns: 0, rbi: 0 },
+        { id: 17, name: "이호연", team: "KT 위즈", position: "내야수", number: 34, games: 100, battingAvg: 0, homeRuns: 100, rbi: 0 },
+        { id: 18, name: "유진공주", team: "KIA 타이거즈", position: "포수", number: 4, games: 1000, battingAvg: 0, homeRuns: 581494, rbi: 1000 },
+        { id: 19, name: "소은공주", team: "KT 위즈", position: "내야수", number: 1, games: 1000, battingAvg: 0, homeRuns: 876494, rbi: 1000 },
+        { id: 20, name: "긍남박왕자", team: "키움", position: "투수", number: 100, games: 1000, battingAvg: 0, homeRuns: 0, rbi: 0 },
     ];
 
     let nextId = 17;
@@ -855,7 +859,7 @@
         }
 
         localStorage.setItem("baseballAccount", JSON.stringify({ username, password }));
-        alert("로그인을 빵 쳐주세요!⚾.");
+        alert("⚾홈런! 로그인을 빵 쳐주세요!⚾");
     }
 
     function login() {
@@ -867,14 +871,14 @@
             localStorage.setItem("baseballUser", username);
             showApp(username);
         } else {
-            alert("로그인 득점 실패!.");
+            alert("😥헛스윙! 로그인 삼진 아웃! 다시 타석을 노리세요😥");
         }
     }
 
     function showApp(username) {
         document.getElementById("loginSection").style.display = "none";
         document.getElementById("appSection").style.display = "block";
-        document.getElementById("welcomeMsg").innerText = "환영합니다, " + username + "님!";
+        document.getElementById("welcomeMsg").innerText = "선수입장합니다, " + username + "님!";
         loadPlayers();
         updateTeamCompareSelect();
     }
