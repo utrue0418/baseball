@@ -1,0 +1,10 @@
+### 새로운 주식 종목 등록 테스트
+POST http://localhost:8080/api/stock/add
+Content-Type: application/json
+
+{
+  "name": "카카오",
+  "currentPrice": 50000.0,
+  "epsGrowthRate": 10.5,
+  "pegRatio": 1.5
+}

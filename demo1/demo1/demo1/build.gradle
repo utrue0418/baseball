@@ -1,0 +1,35 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.2.4'
+    id 'io.spring.dependency-management' version '1.1.4'
+}
+
+group = 'com.example'
+version = '0.0.1-SNAPSHOT'
+
+java {
+    sourceCompatibility = '17'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // 1. 웹 서버 및 REST API를 만들기 위한 기본 부품 (처음에 설치한 것)
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    // 2. 데이터베이스(DB)를 자바 코드로 조종하기 위한 마법 도구 (JPA)
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+
+    // 3. 빠르고 가볍게 쓸 수 있는 연습용 내장 데이터베이스 (H2)
+    //runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
+
+    // 4. 테스트 코드를 위한 기본 부품
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
