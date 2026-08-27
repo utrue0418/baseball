@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>멸망까지 9이닝닝 - 야구 기록 관리 시스템</title>
+
+    <!-- 전광판용 픽셀/LED 폰트 및 Pretendard 폰트 불러오기 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Pretendard', 'Malgun Gothic', sans-serif;
+            /* 연하늘색 스타일 배경 */
+            background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 50%, #f0f9ff 100%);
+            background-attachment: fixed;
+            color: #1e293b;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* 공통 카드 */
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            padding: 24px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(14, 165, 233, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        /* --------------------------------------------------
+           ⚾ 야구장 전광판 스타일 로그인 섹션
+        -------------------------------------------------- */
+        #loginSection {
+            max-width: 440px;
+            margin: 8vh auto;
+            background: #0f172a; /* 전광판 어두운 프레임 */
+            border: 6px solid #1e293b;
+            border-radius: 20px;
+            padding: 30px 24px;
+            box-shadow: 0 20px 35px rgba(15, 23, 42, 0.4), inset 0 0 15px rgba(0, 0, 0, 0.8);
+            position: relative;
+        }
+
+        /* 전광판 전구 느낌 패턴 */
+        #loginSection::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: radial-gradient(rgba(255, 255, 255, 0.1) 15%, transparent 16%);
+            background-size: 8px 8px;
+            pointer-events: none;
+            border-radius: 14px;
+        }
+
+        .scoreboard-header {
+            background: #022c22;
+            border: 2px solid #059669;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 25px;
+            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.7);
+        }
+
+        .login-title {
+            text-align: center;
+            margin: 0;
+            color: #34d399; /* LED 녹색 노출 */
+            font-family: 'Press Start 2P', 'Pretendard', cursive;
+            font-size: 20px;
+            text-shadow: 0 0 8px rgba(52, 211, 153, 0.8), 0 0 15px rgba(52, 211, 153, 0.4);
+            letter-spacing: 1px;
+        }
+
+        .login-subtitle {
+            text-align: center;
+            color: #fbbf24; /* LED 노란색 */
+            font-size: 12px;
+            font-weight: 700;
+            margin-top: 8px;
+            text-shadow: 0 0 5px rgba(251, 191, 36, 0.6);
+            letter-spacing: 1px;
+        }
+
+        #loginSection .form-group label {
+            color: #94a3b8;
+        }
+
+        #loginSection input {
+            background: #1e293b;
+            border: 1px solid #334155;
+            color: #f8fafc;
+            font-family: monospace;
+            font-size: 15px;
+        }
+
+        #loginSection input:focus {
+            border-color: #38bdf8;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+        }
+
+        #appSection {
+            display: none;
+        }
+
+        /* --------------------------------------------------
+           🔹 홈 그라운드 베이스(Base) 모양 버튼 스타일
+        -------------------------------------------------- */
+        .btn {
+            position: relative;
+            padding: 10px 22px 14px 22px;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 14px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            /* 홈 베이스 오각형 클리핑 */
+            clip-path: polygon(50% 0%, 100% 35%, 100% 100%, 0% 100%, 0% 35%);
+            margin: 2px;
+        }
+
+        .btn:hover {
+            filter: brightness(1.1);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn:active {
+            transform: translateY(0) scale(0.98);
+        }
+
+        .btn-primary { background-color: #0284c7; }
+        .btn-success { background-color: #059669; }
+        .btn-danger { background-color: #dc2626; }
+        .btn-warning { background-color: #d97706; }
+        .btn-secondary { background-color: #475569; }
+        .btn-dark { background-color: #0f172a; }
+        .btn-purple { background-color: #7c3aed; }
+
+        /* 상단 네비게이션 */
+        .top-navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            padding: 16px 24px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(14, 165, 233, 0.15);
+            margin-bottom: 20px;
+            gap: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.8);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-area h2 {
+            margin: 0;
+            font-size: 20px;
+            color: #0369a1;
+            font-weight: 800;
+        }
+
+        .logo-ball {
+            font-size: 28px;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .welcome {
+            font-weight: 700;
+            margin-right: 8px;
+            color: #0369a1;
+        }
+
+        /* 폼 요소 */
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            color: #475569;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            font-family: inherit;
+            background: white;
+            transition: all 0.2s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #0284c7;
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2);
+        }
+
+        /* 레이아웃 그리드 */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 2.5fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        /* 섹션 제목 */
+        .section-title {
+            margin-top: 0;
+            font-size: 18px;
+            color: #0f172a;
+            font-weight: 800;
+        }
+
+        .section-subtitle {
+            color: #64748b;
+            font-size: 13px;
+            margin-top: -8px;
+            margin-bottom: 15px;
+        }
+
+        .divider {
+            border: 0;
+            border-top: 1px solid #e0f2fe;
+            margin-bottom: 20px;
+        }
+
+        /* 검색 영역 */
+        .search-area {
+            display: grid;
+            grid-template-columns: 1fr 140px 100px;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        /* 통계 카드 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 18px;
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.08);
+            border: 1px solid #e0f2fe;
+        }
+
+        .stat-title {
+            color: #64748b;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .stat-number {
+            font-size: 26px;
+            font-weight: 800;
+            color: #0f172a;
+            margin-top: 7px;
+        }
+
+        .stat-blue { border-left: 5px solid #0284c7; }
+        .stat-green { border-left: 5px solid #10b981; }
+        .stat-orange { border-left: 5px solid #f59e0b; }
+        .stat-purple { border-left: 5px solid #7c3aed; }
+
+        /* 테이블 */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            font-size: 14px;
+            min-width: 900px;
+        }
+
+        th, td {
+            border-bottom: 1px solid #f1f5f9;
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f0f9ff;
+            color: #0369a1;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        td { word-break: keep-all; }
+
+        .td-name {
+            font-weight: 700;
+            color: #0284c7;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        .td-team {
+            font-weight: 600;
+            color: #0369a1;
+            white-space: nowrap;
+        }
+
+        .td-actions {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .small-btn {
+            padding: 6px 12px 10px 12px;
+            font-size: 11px;
+        }
+
+        /* 포지션 뱃지 */
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .badge-pitcher { background: #dbeafe; color: #1d4ed8; }
+        .badge-catcher { background: #fce7f3; color: #be185d; }
+        .badge-infield { background: #dcfce7; color: #15803d; }
+        .badge-outfield { background: #fef3c7; color: #b45309; }
+        .badge-dh { background: #ede9fe; color: #6d28d9; }
+
+        /* 선수 상세 */
+        #playerDetail { display: none; }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .player-name-large {
+            font-size: 25px;
+            font-weight: 800;
+            color: #0f172a;
+        }
+
+        .player-meta {
+            color: #64748b;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        .record-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .record-box {
+            background: #f0f9ff;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #bae6fd;
+        }
+
+        .record-label { font-size: 12px; color: #0369a1; font-weight: 600; }
+        .record-value { font-size: 22px; font-weight: 800; color: #0f172a; margin-top: 5px; }
+
+        /* 구단 목록 */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+        }
+
+        .team-card {
+            background: white;
+            border: 1px solid #bae6fd;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .team-card:hover {
+            border-color: #0284c7;
+            background: #f0f9ff;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(2, 132, 199, 0.12);
+        }
+
+        .team-logo { font-size: 32px; }
+        .team-name { font-weight: 700; margin-top: 8px; color: #0f172a; }
+        .team-city { font-size: 11px; color: #64748b; margin-top: 4px; }
+
+        /* 선수 및 구단 비교 */
+        .compare-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .compare-box {
+            background: #f8fafc;
+            padding: 18px;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .compare-box h3 { margin-top: 0; color: #0f172a; }
+
+        .compare-stat {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 8px 0;
+        }
+
+        .compare-stat:last-child { border-bottom: none; }
+        .compare-stat strong { color: #0284c7; }
+
+        /* Toast 알림 */
+        #toast {
+            position: fixed;
+            right: 25px;
+            bottom: 25px;
+            background: #0f172a;
+            color: white;
+            padding: 14px 20px;
+            border-radius: 10px;
+            display: none;
+            z-index: 999;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            border: 1px solid #334155;
+        }
+
+        /* 반응형 */
+        @media (max-width: 1100px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+            .top-navbar { flex-direction: column; align-items: flex-start; }
+            .nav-actions { justify-content: flex-start; }
+            .team-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        @media (max-width: 900px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 700px) {
+            .search-area { grid-template-columns: 1fr; }
+            .record-grid { grid-template-columns: repeat(2, 1fr); }
+            .compare-area { grid-template-columns: 1fr; }
+            .team-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            .card { padding: 16px; }
+            .nav-actions { width: 100%; }
+            .nav-actions .btn { flex: 1; }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- 🔒 전광판 스타일 로그인 섹션 -->
+<div id="loginSection">
+    <div class="scoreboard-header">
+        <div style="font-size:32px; margin-bottom: 5px;">⚾</div>
+        <h2 class="login-title">INNING 9</h2>
+        <div class="login-subtitle">SCOREBOARD SYSTEM</div>
+    </div>
+
+    <div class="form-group">
+        <label>USER ID</label>
+        <input type="text" id="username" placeholder="아이디를 입력하세요">
+    </div>
+    <div class="form-group">
+        <label>PASSWORD</label>
+        <input type="password" id="password" placeholder="비밀번호를 입력하세요">
+    </div>
+
+    <button class="btn btn-primary" onclick="login()" style="width:100%; margin-top:15px; margin-bottom:8px;">로그인</button>
+    <button class="btn btn-success" onclick="register()" style="width:100%;">새로 가입하기</button>
+</div>
+
+
+<!-- ⚾ 메인 화면 -->
+<div id="appSection">
+
+    <!-- 상단 네비게이션 -->
+    <header class="top-navbar">
+        <div class="logo-area">
+            <span class="logo-ball">⚾</span>
+            <h2>멸망까지 9이닝닝</h2>
+        </div>
+        <div class="nav-actions">
+            <span id="welcomeMsg" class="welcome"></span>
+            <button class="btn btn-primary" onclick="showAllPlayers()">👤 선수</button>
+            <button class="btn btn-purple" onclick="showTeams()">🏟️ 구단</button>
+            <button class="btn btn-warning" onclick="startGameSimulator()">▶ 경기 시뮬레이션</button>
+            <button class="btn btn-success" onclick="downloadCSV()">📥 CSV 다운로드</button>
+            <button class="btn btn-secondary" onclick="logout()">🚪 로그아웃</button>
+        </div>
+    </header>
+
+    <!-- 통계 카드 -->
+    <div class="stats-grid">
+        <div class="stat-card stat-blue">
+            <div class="stat-title">등록 선수</div>
+            <div id="totalPlayers" class="stat-number">0</div>
+        </div>
+        <div class="stat-card stat-green">
+            <div class="stat-title">KBO 구단</div>
+            <div class="stat-number">10</div>
+        </div>
+        <div class="stat-card stat-orange">
+            <div class="stat-title">등록 경기</div>
+            <div id="totalGames" class="stat-number">0</div>
+        </div>
+        <div class="stat-card stat-purple">
+            <div class="stat-title">평균 타율</div>
+            <div id="averageBatting" class="stat-number">0.000</div>
+        </div>
+    </div>
+
+    <!-- 선수 등록 + 선수 목록 -->
+    <div class="dashboard-grid">
+        <!-- 좌측: 선수 등록 폼 -->
+        <div>
+            <div class="card">
+                <h2 id="formTitle" class="section-title">선수 등록</h2>
+                <p class="section-subtitle">새로운 야구 선수 정보를 등록합니다.</p>
+                <hr class="divider">
+
+                <input type="hidden" id="playerId">
+
+                <div class="form-group">
+                    <label>선수명</label>
+                    <input type="text" id="playerName" placeholder="예: 김도영">
+                </div>
+
+                <div class="form-group">
+                    <label>소속 구단</label>
+                    <select id="team">
+                        <option>KIA 타이거즈</option>
+                        <option>삼성 라이온즈</option>
+                        <option>LG 트윈스</option>
+                        <option>두산 베어스</option>
+                        <option>KT 위즈</option>
+                        <option>SSG 랜더스</option>
+                        <option>롯데 자이언츠</option>
+                        <option>한화 이글스</option>
+                        <option>NC 다이노스</option>
+                        <option>키움 히어로즈</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>포지션</label>
+                    <select id="position">
+                        <option value="투수">투수</option>
+                        <option value="포수">포수</option>
+                        <option value="내야수">내야수</option>
+                        <option value="외야수">외야수</option>
+                        <option value="지명타자">지명타자</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>등번호</label>
+                    <input type="number" id="number" placeholder="예: 5">
+                </div>
+
+                <div class="form-group">
+                    <label>경기 수</label>
+                    <input type="number" id="games" value="0">
+                </div>
+
+                <div class="form-group">
+                    <label>타율</label>
+                    <input type="number" id="battingAvg" placeholder="0.000" step="0.001">
+                </div>
+
+                <div class="form-group">
+                    <label>홈런</label>
+                    <input type="number" id="homeRuns" value="0">
+                </div>
+
+                <div class="form-group">
+                    <label>타점</label>
+                    <input type="number" id="rbi" value="0">
+                </div>
+
+                <button id="submitBtn" class="btn btn-primary" onclick="addPlayer()" style="width:100%; margin-top:10px;">DB에 선수 등록하기</button>
+                <button id="cancelBtn" class="btn btn-secondary" onclick="cancelUpdate()" style="width:100%; margin-top:10px; display:none;">수정 취소</button>
+            </div>
+        </div>
+
+        <!-- 우측: 선수 리스트 -->
+        <div>
+            <div class="card">
+                <h2 class="section-title">선수 경기 기록</h2>
+                <p class="section-subtitle">2026 시즌 선수 주요 기록을 확인합니다.</p>
+                <hr class="divider">
+
+                <div class="search-area">
+                    <input type="text" id="searchInput" placeholder="선수명 또는 구단명을 검색하세요." onkeyup="searchPlayers()">
+                    <select id="positionFilter" onchange="searchPlayers()">
+                        <option value="">전체 포지션</option>
+                        <option value="투수">투수</option>
+                        <option value="포수">포수</option>
+                        <option value="내야수">내야수</option>
+                        <option value="외야수">외야수</option>
+                        <option value="지명타자">지명타자</option>
+                    </select>
+                    <button class="btn btn-dark" onclick="searchPlayers()">검색</button>
+                </div>
+
+                <div class="table-wrapper">
+                    <table id="playerTable">
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>선수명</th>
+                            <th>구단</th>
+                            <th>포지션</th>
+                            <th>등번호</th>
+                            <th>경기</th>
+                            <th>타율</th>
+                            <th>홈런</th>
+                            <th>타점</th>
+                            <th>관리</th>
+                        </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 선수 상세 정보 -->
+    <div id="playerDetail" class="card">
+        <div class="detail-header">
+            <div>
+                <div id="detailPlayerName" class="player-name-large"></div>
+                <div id="detailPlayerMeta" class="player-meta"></div>
+            </div>
+            <button class="btn btn-secondary" onclick="closePlayerDetail()">닫기</button>
+        </div>
+
+        <div class="record-grid">
+            <div class="record-box">
+                <div class="record-label">경기</div>
+                <div id="detailGames" class="record-value">0</div>
+            </div>
+            <div class="record-box">
+                <div class="record-label">타율</div>
+                <div id="detailAvg" class="record-value">0.000</div>
+            </div>
+            <div class="record-box">
+                <div class="record-label">홈런</div>
+                <div id="detailHR" class="record-value">0</div>
+            </div>
+            <div class="record-box">
+                <div class="record-label">타점</div>
+                <div id="detailRBI" class="record-value">0</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- KBO 구단 카드 -->
+    <div class="card">
+        <h2 class="section-title">🏟️ KBO 리그 구단</h2>
+        <p class="section-subtitle">2026 KBO 리그 10개 구단</p>
+        <hr class="divider">
+
+        <div class="team-grid">
+            <div class="team-card" onclick="filterTeam('KIA 타이거즈')">
+                <div class="team-logo">🐯</div>
+                <div class="team-name">KIA 타이거즈</div>
+                <div class="team-city">광주</div>
+            </div>
+            <div class="team-card" onclick="filterTeam('삼성 라이온즈')">
+                <div class="team-logo">🦁</div>
+                <div class="team-name">삼성 라이온즈</div>
+                <div class="team-city">대구</div>
+            </div>
+            <div class="team-card" onclick="filterTeam('LG 트윈스')">
+                <div class="team-logo">🦅</div>
+                <div class="team-name">LG 트윈스</div>
+                <div class="team-city">서울</div>
+            </div>
+            <div class="team-card" onclick="filterTeam('두산 베어스')">
+                <div class="team-logo">🐻</div>
+                <div class="team-name">두산 베어스</div>
+                <div class="team-city">서울</div>
+            </div>
+            <div class="team-card" onclick="filterTeam('KT 위즈')">
+                <div class="team-logo">⚡</div>
+                <div class="team-name">KT 위즈</div>
+                <div class="team-city">수원</div>
+            </div>
+            <div class="team-card" onclick="filterTeam('SSG 랜더스')">
+                <div class="team-logo">⚾</div>
+                <div class="team-name">SSG 랜더스</div>
+                <div class="team-city">인천</div>
+            </div>
+            <div class="team-card" onclick="filterTeam('롯데 자이언츠')">
+                <div class="team-logo">⚓</div>
+                <div class="team-name">롯데 자이언츠</div>
+                <div class="team-city">부산</div>
+            </div>
+            <div class="team-card" onclick="filterTeam('한화 이글스')">
+                <div class="team-logo">🦅</div>
+                <div class="team-name">한화 이글스</div>
+                <div class="team-city">대전</div>
+            </div>
+            <div class="team-card" onclick="filterTeam('NC 다이노스')">
+                <div class="team-logo">🦖</div>
+                <div class="team-name">NC 다이노스</div>
+                <div class="team-city">창원</div>
+            </div>
+            <div class="team-card" onclick="filterTeam('키움 히어로즈')">
+                <div class="team-logo">🦸</div>
+                <div class="team-name">키움 히어로즈</div>
+                <div class="team-city">서울</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 팀별 비교 -->
+    <div class="card">
+        <h2 class="section-title">📊 팀별 주요 성적 비교</h2>
+        <p class="section-subtitle">두 구단의 주요 경기 및 타격 기록을 비교합니다.</p>
+        <hr class="divider">
+
+        <div class="compare-area">
+            <div class="compare-box">
+                <h3>팀 A</h3>
+                <select id="compareTeamA" onchange="updateTeamCompare()">
+                    <option value="">구단 선택</option>
+                </select>
+                <div id="compareAResult" style="margin-top:15px;">구단을 선택하세요.</div>
+            </div>
+            <div class="compare-box">
+                <h3>팀 B</h3>
+                <select id="compareTeamB" onchange="updateTeamCompare()">
+                    <option value="">구단 선택</option>
+                </select>
+                <div id="compareBResult" style="margin-top:15px;">구단을 선택하세요.</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Toast 알림 -->
+<div id="toast"></div>
+
+<script>
+    /* 2026 KBO 샘플 선수 데이터 */
+    let players = [
+        { id: 1, name: "김도영", team: "KIA 타이거즈", position: "내야수", number: 5, games: 100, battingAvg: 0.347, homeRuns: 25, rbi: 70 },
+        { id: 2, name: "박병호", team: "삼성 라이온즈", position: "내야수", number: 52, games: 95, battingAvg: 0.280, homeRuns: 20, rbi: 65 },
+        { id: 3, name: "오지환", team: "LG 트윈스", position: "내야수", number: 10, games: 90, battingAvg: 0.265, homeRuns: 8, rbi: 45 },
+        { id: 4, name: "양의지", team: "두산 베어스", position: "포수", number: 25, games: 92, battingAvg: 0.295, homeRuns: 15, rbi: 60 },
+        { id: 5, name: "강백호", team: "한화 이글스", position: "내야수", number: 50, games: 98, battingAvg: 0.310, homeRuns: 18, rbi: 62 },
+        { id: 6, name: "최정", team: "SSG 랜더스", position: "내야수", number: 14, games: 88, battingAvg: 0.275, homeRuns: 22, rbi: 58 },
+        { id: 7, name: "전준우", team: "롯데 자이언츠", position: "외야수", number: 8, games: 90, battingAvg: 0.290, homeRuns: 10, rbi: 50 },
+        { id: 8, name: "노시환", team: "한화 이글스", position: "내야수", number: 8, games: 96, battingAvg: 0.285, homeRuns: 19, rbi: 68 },
+        { id: 9, name: "박민우", team: "NC 다이노스", position: "내야수", number: 2, games: 91, battingAvg: 0.305, homeRuns: 5, rbi: 40 },
+        { id: 10, name: "송성문", team: "키움 히어로즈", position: "내야수", number: 24, games: 93, battingAvg: 0.300, homeRuns: 12, rbi: 55 },
+        { id: 11, name: "구자욱", team: "삼성 라이온즈", position: "외야수", number: 5, games: 94, battingAvg: 0.325, homeRuns: 17, rbi: 64 },
+        { id: 12, name: "홍창기", team: "LG 트윈스", position: "외야수", number: 51, games: 97, battingAvg: 0.315, homeRuns: 7, rbi: 48 },
+        { id: 13, name: "김현수", team: "LG 트윈스", position: "외야수", number: 22, games: 95, battingAvg: 0.290, homeRuns: 14, rbi: 61 },
+        { id: 14, name: "최형우", team: "삼성 라이온즈", position: "지명타자", number: 34, games: 90, battingAvg: 0.285, homeRuns: 16, rbi: 63 },
+        { id: 15, name: "김원중", team: "롯데 자이언츠", position: "투수", number: 34, games: 45, battingAvg: 0, homeRuns: 0, rbi: 0 },
+        { id: 16, name: "원태인", team: "삼성 라이온즈", position: "투수", number: 18, games: 20, battingAvg: 0, homeRuns: 0, rbi: 0 }
+    ];
+
+    let nextId = 17;
+
+    const teams = [
+        { name: "KIA 타이거즈", city: "광주", games: 100, wins: 55, losses: 45 },
+        { name: "삼성 라이온즈", city: "대구", games: 100, wins: 53, losses: 47 },
+        { name: "LG 트윈스", city: "서울", games: 100, wins: 56, losses: 44 },
+        { name: "두산 베어스", city: "서울", games: 100, wins: 48, losses: 52 },
+        { name: "KT 위즈", city: "수원", games: 100, wins: 51, losses: 49 },
+        { name: "SSG 랜더스", city: "인천", games: 100, wins: 50, losses: 50 },
+        { name: "롯데 자이언츠", city: "부산", games: 100, wins: 47, losses: 53 },
+        { name: "한화 이글스", city: "대전", games: 100, wins: 52, losses: 48 },
+        { name: "NC 다이노스", city: "창원", games: 100, wins: 46, losses: 54 },
+        { name: "키움 히어로즈", city: "서울", games: 100, wins: 42, losses: 58 }
+    ];
+
+    window.onload = function() {
+        const savedUser = localStorage.getItem("baseballUser");
+        if (savedUser) {
+            showApp(savedUser);
+        } else {
+            document.getElementById("loginSection").style.display = "block";
+        }
+    };
+
+    function register() {
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+
+        if (!username || !password) {
+            alert("아이디와 비밀번호를 입력하세요.");
+            return;
+        }
+
+        localStorage.setItem("baseballAccount", JSON.stringify({ username, password }));
+        alert("로그인을 빵 쳐주세요!⚾.");
+    }
+
+    function login() {
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+        const account = JSON.parse(localStorage.getItem("baseballAccount"));
+
+        if (account && account.username === username && account.password === password) {
+            localStorage.setItem("baseballUser", username);
+            showApp(username);
+        } else {
+            alert("로그인 득점 실패!.");
+        }
+    }
+
+    function showApp(username) {
+        document.getElementById("loginSection").style.display = "none";
+        document.getElementById("appSection").style.display = "block";
+        document.getElementById("welcomeMsg").innerText = "환영합니다, " + username + "님!";
+        loadPlayers();
+        updateTeamCompareSelect();
+    }
+
+    function logout() {
+        localStorage.removeItem("baseballUser");
+        location.reload();
+    }
+
+    function addPlayer() {
+        const name = document.getElementById("playerName").value;
+        const team = document.getElementById("team").value;
+        const position = document.getElementById("position").value;
+        const number = Number(document.getElementById("number").value);
+        const games = Number(document.getElementById("games").value) || 0;
+        const battingAvg = Number(document.getElementById("battingAvg").value) || 0;
+        const homeRuns = Number(document.getElementById("homeRuns").value) || 0;
+        const rbi = Number(document.getElementById("rbi").value) || 0;
+
+        if (!name) {
+            alert("선수명을 입력하세요.");
+            return;
+        }
+
+        const player = { id: nextId++, name, team, position, number, games, battingAvg, homeRuns, rbi };
+        players.push(player);
+
+        showToast("선수 정보가 등록되었습니다.");
+        cancelUpdate();
+        loadPlayers();
+    }
+
+    function loadPlayers(data = players) {
+        const tbody = document.querySelector("#playerTable tbody");
+        tbody.innerHTML = "";
+
+        data.forEach(player => {
+            tbody.innerHTML += `
+                <tr>
+                    <td>${player.id}</td>
+                    <td class="td-name" onclick="showPlayerDetail(${player.id})">${player.name}</td>
+                    <td class="td-team">${player.team}</td>
+                    <td>${getPositionBadge(player.position)}</td>
+                    <td>${player.number || "-"}</td>
+                    <td>${player.games}</td>
+                    <td>${Number(player.battingAvg).toFixed(3)}</td>
+                    <td>${player.homeRuns}</td>
+                    <td>${player.rbi}</td>
+                    <td class="td-actions">
+                        <button class="btn btn-success small-btn" onclick="prepareUpdate(${player.id})">수정</button>
+                        <button class="btn btn-danger small-btn" onclick="deletePlayer(${player.id})">삭제</button>
+                    </td>
+                </tr>
+            `;
+        });
+
+        updateStats();
+    }
+
+    function getPositionBadge(position) {
+        let className = "badge badge-infield";
+
+        if (position === "투수") className = "badge badge-pitcher";
+        else if (position === "포수") className = "badge badge-catcher";
+        else if (position === "외야수") className = "badge badge-outfield";
+        else if (position === "지명타자") className = "badge badge-dh";
+
+        return `<span class="${className}">${position}</span>`;
+    }
+
+    function searchPlayers() {
+        const keyword = document.getElementById("searchInput").value.toLowerCase();
+        const position = document.getElementById("positionFilter").value;
+
+        const result = players.filter(player => {
+            const keywordMatch = player.name.toLowerCase().includes(keyword) || player.team.toLowerCase().includes(keyword);
+            const positionMatch = !position || player.position === position;
+            return keywordMatch && positionMatch;
+        });
+
+        loadPlayers(result);
+    }
+
+    function filterTeam(teamName) {
+        document.getElementById("searchInput").value = teamName;
+        document.getElementById("positionFilter").value = "";
+        searchPlayers();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function showAllPlayers() {
+        document.getElementById("searchInput").value = "";
+        document.getElementById("positionFilter").value = "";
+        loadPlayers();
+    }
+
+    function showTeams() {
+        document.querySelector(".team-grid").scrollIntoView({ behavior: "smooth" });
+    }
+
+    function prepareUpdate(id) {
+        const player = players.find(p => p.id === id);
+        if (!player) return;
+
+        document.getElementById("playerId").value = player.id;
+        document.getElementById("playerName").value = player.name;
+        document.getElementById("team").value = player.team;
+        document.getElementById("position").value = player.position;
+        document.getElementById("number").value = player.number;
+        document.getElementById("games").value = player.games;
+        document.getElementById("battingAvg").value = player.battingAvg;
+        document.getElementById("homeRuns").value = player.homeRuns;
+        document.getElementById("rbi").value = player.rbi;
+
+        document.getElementById("formTitle").innerText = "선수 정보 수정";
+        document.getElementById("submitBtn").innerText = "DB 수정하기";
+        document.getElementById("submitBtn").onclick = updatePlayer;
+        document.getElementById("cancelBtn").style.display = "block";
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function updatePlayer() {
+        const id = Number(document.getElementById("playerId").value);
+        const player = players.find(p => p.id === id);
+        if (!player) return;
+
+        player.name = document.getElementById("playerName").value;
+        player.team = document.getElementById("team").value;
+        player.position = document.getElementById("position").value;
+        player.number = Number(document.getElementById("number").value);
+        player.games = Number(document.getElementById("games").value) || 0;
+        player.battingAvg = Number(document.getElementById("battingAvg").value) || 0;
+        player.homeRuns = Number(document.getElementById("homeRuns").value) || 0;
+        player.rbi = Number(document.getElementById("rbi").value) || 0;
+
+        showToast("선수 정보가 수정되었습니다.");
+        cancelUpdate();
+        loadPlayers();
+    }
+
+    function cancelUpdate() {
+        document.getElementById("playerId").value = "";
+        document.getElementById("playerName").value = "";
+        document.getElementById("number").value = "";
+        document.getElementById("games").value = 0;
+        document.getElementById("battingAvg").value = "";
+        document.getElementById("homeRuns").value = 0;
+        document.getElementById("rbi").value = 0;
+
+        document.getElementById("submitBtn").innerText = "DB에 선수 등록하기";
+        document.getElementById("submitBtn").onclick = addPlayer;
+        document.getElementById("cancelBtn").style.display = "none";
+        document.getElementById("formTitle").innerText = "선수 등록";
+    }
+
+    function deletePlayer(id) {
+        const player = players.find(p => p.id === id);
+        if (!player) return;
+
+        if (confirm(player.name + " 선수를 정말 삭제하시겠습니까?")) {
+            players = players.filter(p => p.id !== id);
+            loadPlayers();
+            showToast("선수 정보가 삭제되었습니다.");
+        }
+    }
+
+    function showPlayerDetail(id) {
+        const player = players.find(p => p.id === id);
+        if (!player) return;
+
+        document.getElementById("playerDetail").style.display = "block";
+        document.getElementById("detailPlayerName").innerText = player.name;
+        document.getElementById("detailPlayerMeta").innerText = `${player.team} · ${player.position} · ${player.number}번`;
+        document.getElementById("detailGames").innerText = player.games;
+        document.getElementById("detailAvg").innerText = Number(player.battingAvg).toFixed(3);
+        document.getElementById("detailHR").innerText = player.homeRuns;
+        document.getElementById("detailRBI").innerText = player.rbi;
+
+        document.getElementById("playerDetail").scrollIntoView({ behavior: "smooth" });
+    }
+
+    function closePlayerDetail() {
+        document.getElementById("playerDetail").style.display = "none";
+    }
+
+    function updateStats() {
+        document.getElementById("totalPlayers").innerText = players.length;
+        document.getElementById("totalGames").innerText = players.reduce((sum, p) => sum + p.games, 0);
+
+        if (players.length === 0) {
+            document.getElementById("averageBatting").innerText = "0.000";
+            return;
+        }
+
+        const avg = players.reduce((sum, p) => sum + Number(p.battingAvg), 0) / players.length;
+        document.getElementById("averageBatting").innerText = avg.toFixed(3);
+    }
+
+    function updateTeamCompareSelect() {
+        const selectA = document.getElementById("compareTeamA");
+        const selectB = document.getElementById("compareTeamB");
+
+        selectA.innerHTML = '<option value="">구단 선택</option>';
+        selectB.innerHTML = '<option value="">구단 선택</option>';
+
+        teams.forEach(team => {
+            selectA.innerHTML += `<option value="${team.name}">${team.name}</option>`;
+            selectB.innerHTML += `<option value="${team.name}">${team.name}</option>`;
+        });
+    }
+
+    function updateTeamCompare() {
+        const teamAName = document.getElementById("compareTeamA").value;
+        const teamBName = document.getElementById("compareTeamB").value;
+
+        const teamA = teams.find(t => t.name === teamAName);
+        const teamB = teams.find(t => t.name === teamBName);
+
+        document.getElementById("compareAResult").innerHTML = teamA ? createTeamCompareHTML(teamA) : "구단을 선택하세요.";
+        document.getElementById("compareBResult").innerHTML = teamB ? createTeamCompareHTML(teamB) : "구단을 선택하세요.";
+    }
+
+    function createTeamCompareHTML(team) {
+        const teamPlayers = players.filter(p => p.team === team.name);
+
+        let average = 0;
+        let homeRuns = 0;
+        let rbi = 0;
+
+        if (teamPlayers.length > 0) {
+            average = teamPlayers.reduce((sum, p) => sum + Number(p.battingAvg), 0) / teamPlayers.length;
+            homeRuns = teamPlayers.reduce((sum, p) => sum + Number(p.homeRuns), 0);
+            rbi = teamPlayers.reduce((sum, p) => sum + Number(p.rbi), 0);
+        }
+
+        const winRate = (team.wins / team.games * 100).toFixed(1);
+
+        return `
+            <div style="line-height:1.9;">
+                <div class="compare-stat"><span>구단</span><strong>${team.name}</strong></div>
+                <div class="compare-stat"><span>경기</span><strong>${team.games}</strong></div>
+                <div class="compare-stat"><span>승</span><strong>${team.wins}</strong></div>
+                <div class="compare-stat"><span>패</span><strong>${team.losses}</strong></div>
+                <div class="compare-stat"><span>승률</span><strong>${winRate}%</strong></div>
+                <div class="compare-stat"><span>평균 타율</span><strong>${average.toFixed(3)}</strong></div>
+                <div class="compare-stat"><span>홈런</span><strong>${homeRuns}</strong></div>
+                <div class="compare-stat"><span>타점</span><strong>${rbi}</strong></div>
+            </div>
+        `;
+    }
+
+    function startGameSimulator() {
+        if (confirm("경기 기록 시뮬레이션을 시작하시겠습니까?")) {
+            showToast("⚾ 경기 시뮬레이션이 시작되었습니다.");
+            setTimeout(() => {
+                showToast("🏟️ 경기 기록이 업데이트되었습니다.");
+            }, 2000);
+        }
+    }
+
+    function downloadCSV() {
+        let csv = "ID,선수명,구단,포지션,등번호,경기수,타율,홈런,타점\n";
+
+        players.forEach(player => {
+            csv += `${player.id},${player.name},${player.team},${player.position},${player.number},${player.games},${player.battingAvg},${player.homeRuns},${player.rbi}\n`;
+        });
+
+        const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = "baseball_player_records_2026.csv";
+        link.click();
+        URL.revokeObjectURL(url);
+
+        showToast("CSV 파일이 다운로드되었습니다.");
+    }
+
+    function showToast(message) {
+        const toast = document.getElementById("toast");
+        toast.innerText = message;
+        toast.style.display = "block";
+
+        setTimeout(() => {
+            toast.style.display = "none";
+        }, 2500);
+    }
+</script>
+
+</body>
+</html>
