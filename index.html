@@ -38,16 +38,16 @@
         }
 
         /* --------------------------------------------------
-           ⚾ 야구장 전광판 스타일 로그인 섹션
+           ⚾ 야구장 전광판 스타일 로그인 섹션 (크기 확대)
         -------------------------------------------------- */
         #loginSection {
-            max-width: 440px;
-            margin: 8vh auto;
+            max-width: 520px; /* 기존 440px -> 520px로 확대 */
+            margin: 6vh auto;
             background: #0f172a; /* 전광판 어두운 프레임 */
-            border: 6px solid #1e293b;
-            border-radius: 20px;
-            padding: 30px 24px;
-            box-shadow: 0 20px 35px rgba(15, 23, 42, 0.4), inset 0 0 15px rgba(0, 0, 0, 0.8);
+            border: 8px solid #1e293b; /* 테두리 두께 확대 */
+            border-radius: 24px;
+            padding: 40px 36px; /* 내부 여백 확대 */
+            box-shadow: 0 25px 45px rgba(15, 23, 42, 0.45), inset 0 0 20px rgba(0, 0, 0, 0.9);
             position: relative;
         }
 
@@ -56,20 +56,20 @@
             content: "";
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: radial-gradient(rgba(255, 255, 255, 0.1) 15%, transparent 16%);
-            background-size: 8px 8px;
+            background: radial-gradient(rgba(255, 255, 255, 0.12) 15%, transparent 16%);
+            background-size: 10px 10px;
             pointer-events: none;
-            border-radius: 14px;
+            border-radius: 16px;
         }
 
         .scoreboard-header {
             background: #022c22;
-            border: 2px solid #059669;
-            border-radius: 8px;
-            padding: 15px;
+            border: 3px solid #059669;
+            border-radius: 12px;
+            padding: 20px 15px;
             text-align: center;
-            margin-bottom: 25px;
-            box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.7);
+            margin-bottom: 30px;
+            box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.8);
         }
 
         .login-title {
@@ -77,36 +77,52 @@
             margin: 0;
             color: #34d399; /* LED 녹색 노출 */
             font-family: 'Press Start 2P', 'Pretendard', cursive;
-            font-size: 20px;
-            text-shadow: 0 0 8px rgba(52, 211, 153, 0.8), 0 0 15px rgba(52, 211, 153, 0.4);
-            letter-spacing: 1px;
+            font-size: 26px; /* 기존 20px -> 26px로 확대 */
+            text-shadow: 0 0 10px rgba(52, 211, 153, 0.8), 0 0 20px rgba(52, 211, 153, 0.5);
+            letter-spacing: 2px;
         }
 
         .login-subtitle {
             text-align: center;
             color: #fbbf24; /* LED 노란색 */
-            font-size: 12px;
+            font-size: 14px; /* 기존 12px -> 14px로 확대 */
             font-weight: 700;
-            margin-top: 8px;
-            text-shadow: 0 0 5px rgba(251, 191, 36, 0.6);
-            letter-spacing: 1px;
+            margin-top: 10px;
+            text-shadow: 0 0 8px rgba(251, 191, 36, 0.6);
+            letter-spacing: 2px;
+        }
+
+        #loginSection .form-group {
+            margin-bottom: 20px;
         }
 
         #loginSection .form-group label {
             color: #94a3b8;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
         }
 
         #loginSection input {
             background: #1e293b;
-            border: 1px solid #334155;
+            border: 2px solid #334155;
             color: #f8fafc;
             font-family: monospace;
-            font-size: 15px;
+            font-size: 17px; /* 폰트 크기 확대 */
+            padding: 14px 16px; /* 입력창 높이 확대 */
+            border-radius: 10px;
         }
 
         #loginSection input:focus {
             border-color: #38bdf8;
-            box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+            box-shadow: 0 0 12px rgba(56, 189, 248, 0.5);
+        }
+
+        /* 로그인 영역 전용 버튼 높이 조정 */
+        #loginSection .btn-login-main {
+            font-size: 16px;
+            padding: 14px 24px 18px 24px;
         }
 
         #appSection {
@@ -498,6 +514,8 @@
             .card { padding: 16px; }
             .nav-actions { width: 100%; }
             .nav-actions .btn { flex: 1; }
+            #loginSection { padding: 30px 20px; }
+            .login-title { font-size: 20px; }
         }
     </style>
 </head>
@@ -507,7 +525,7 @@
 <!-- 🔒 전광판 스타일 로그인 섹션 -->
 <div id="loginSection">
     <div class="scoreboard-header">
-        <div style="font-size:32px; margin-bottom: 5px;">⚾</div>
+        <div style="font-size:42px; margin-bottom: 8px;">⚾</div>
         <h2 class="login-title">INNING 9</h2>
         <div class="login-subtitle">SCOREBOARD SYSTEM</div>
     </div>
@@ -521,8 +539,8 @@
         <input type="password" id="password" placeholder="비밀번호를 입력하세요">
     </div>
 
-    <button class="btn btn-primary" onclick="login()" style="width:100%; margin-top:15px; margin-bottom:8px;">로그인</button>
-    <button class="btn btn-success" onclick="register()" style="width:100%;">새로 가입하기</button>
+    <button class="btn btn-primary btn-login-main" onclick="login()" style="width:100%; margin-top:20px; margin-bottom:12px;">로그인</button>
+    <button class="btn btn-success btn-login-main" onclick="register()" style="width:100%;">새로 가입하기</button>
 </div>
 
 
